@@ -10,16 +10,19 @@ fn main() {
     let configdir = match env::var("XDG_CONFIG_HOME") {
         Ok(val) => format!("{val}/rsoku/config.ron"),
         Err(..) => match env::var("HOME") {
-            Ok(val) => val,
-            Err(..) => panic!("cannot find HOME environment variable"),
+            Ok(val) => format!("{val}/config.ron"),
+            Err(..) => match env::var("USER") {
+                Ok(val) => format!("/home/{val}/.config/rsoku/cinfig.ron")
+                Err(..) => panic!("cannot find config file: HOME, USER, and XDG_CONFIG_HOME are all unset"),
+            }
         },
     };
-    let config:Config = match fs::read_to_string(configdir) {
+    let config:Config = match fs::read_to_string(&configdir) {
         Ok(val) => match ron::from_str(&val) {
             Ok(val) => val,
             Err(err) => panic!("{0} at line: {1} collum: {2}",err.code,err.position.line,err.position.col)
         },
-        Err(..) => panic!("couldn't find config"),
+        Err(..) => panic!("cannot find config file at {configdir}"),
     };
     let mut argiter = env::args().peekable();
     argiter.next();
