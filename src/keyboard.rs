@@ -6,30 +6,42 @@ use crate::{start_client,Config};
 
 pub fn kbd(config:&Config) {
     let post = start_client(&config.addr);
+    let mut countdown:u8 = 0;
     init();
     loop {
-        match event::read() {
-            Ok(Event::Key(kev)) => {
-                if kev.code == KeyCode::Char('c') && kev.modifiers == KeyModifiers::CONTROL {
-                    break;
-                }
-                if let Some(action) = KeyAndMods::from_key_event(kev).action(&config.keybinds) {
-                    match action.run(&post) {
-                        ExitInstr::Nothing => (),
-                        ExitInstr::Break => break,
-                        ExitInstr::Error => {
-                            cleanup();
-                            panic!("panicked on ExitInstr")
-                        },
+        if event::poll(Duration::from_millis(5)).is_ok_and(|x| x) {
+            // lets us read events while waiting for input delay to end
+            // this way events don't build up
+            if countdown > 0 {
+                let _ = event::read();
+                continue;
+            }
+            match event::read() {
+                Ok(Event::Key(kev)) => {
+                    if kev.code == KeyCode::Char('c') && kev.modifiers == KeyModifiers::CONTROL {
+                        break;
                     }
-                }
-            },
-            Err(err) => {
-                cleanup();
-                panic!("{err}")
-            },
-            _ => (),
+                    if let Some(action) = KeyAndMods::from_key_event(kev).action(&config.keybinds) {
+                        // run the action and match on its ExitInstr
+                        // in most cases, if the action was successful, this will be Nothing
+                        match action.run(&post,&mut countdown) {
+                            ExitInstr::Nothing => (),
+                            ExitInstr::Break => break,
+                            ExitInstr::Error => {
+                                cleanup();
+                                panic!("panicked on ExitInstr")
+                            },
+                        }
+                    }
+                },
+                Err(err) => {
+                    cleanup();
+                    panic!("{err}")
+                },
+                _ => (),
+            }
         }
+        countdown = countdown.saturating_sub(1);
     }
     cleanup();
 }
@@ -64,17 +76,18 @@ pub enum Action {
     Info,
     PowerOff,
     KeyboardInput,
+    // this action exists for configuration purposes
     Nothing,
 }
 impl Action {
-    fn run(&self,post:&impl Fn(&str)) -> ExitInstr {
-        self.run_custom_delay(post,self.get_delay())
+    fn run(&self,post:&impl Fn(&str),countdown:&mut u8) -> ExitInstr {
+        self.run_custom_delay(post,self.get_delay(),countdown)
     }
-    fn run_custom_delay(&self,post:&impl Fn(&str),delay:u64) -> ExitInstr {
+    fn run_custom_delay(&self,post:&impl Fn(&str),delay:u8,countdown:&mut u8) -> ExitInstr {
         macro_rules! action {
             ($post:expr) => {
                 post($post);
-                sleep(Duration::from_millis(delay));
+                *countdown = delay;
             };
         }
         match self {
@@ -127,16 +140,17 @@ impl Action {
         };
         ExitInstr::Nothing
     }
-    fn get_delay(&self) -> u64 {
+    // Delays are in increments of 5 milliseconds, because our event::poll timeout is 5 milliseconds
+    fn get_delay(&self) -> u8 {
         match self {
             Self::Nothing | Self::Exit | Self::KeyboardInput
                 => 0,
             Self::Up | Self::Down | Self::Left | Self::Right |
             Self::Select | Self::Home | Self::Back | Self::Info |
             Self::Play| Self::Rev | Self::Fwd | Self::InstantReplay
-                => 50,
+                => 10,
             Self::VolumeUp | Self::VolumeDown | Self::VolumeMute | Self::PowerOff
-                => 250,
+                => 50,
         }
     }
 }
