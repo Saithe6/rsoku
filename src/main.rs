@@ -12,7 +12,7 @@ fn main() {
         Err(..) => match env::var("HOME") {
             Ok(val) => format!("{val}/config.ron"),
             Err(..) => match env::var("USER") {
-                Ok(val) => format!("/home/{val}/.config/rsoku/cinfig.ron"),
+                Ok(val) => format!("/home/{val}/.config/rsoku/config.ron"),
                 Err(..) => panic!("cannot find config file: HOME, USER, and XDG_CONFIG_HOME are all unset"),
             }
         },
