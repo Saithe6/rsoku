@@ -1,4 +1,4 @@
-use std::{thread::sleep,time::Duration,collections::HashMap};
+use std::{time::Duration,collections::HashMap};
 use crossterm::{event::{self,DisableBracketedPaste,EnableBracketedPaste,Event,KeyCode,KeyEvent,KeyModifiers},execute,terminal};
 use url::form_urlencoded::byte_serialize;
 use serde::{Serialize,Deserialize};
@@ -14,31 +14,31 @@ pub fn kbd(config:&Config) {
             // this way events don't build up
             if countdown > 0 {
                 let _ = event::read();
-                continue;
-            }
-            match event::read() {
-                Ok(Event::Key(kev)) => {
-                    if kev.code == KeyCode::Char('c') && kev.modifiers == KeyModifiers::CONTROL {
-                        break;
-                    }
-                    if let Some(action) = KeyAndMods::from_key_event(kev).action(&config.keybinds) {
-                        // run the action and match on its ExitInstr
-                        // in most cases, if the action was successful, this will be Nothing
-                        match action.run(&post,&mut countdown) {
-                            ExitInstr::Nothing => (),
-                            ExitInstr::Break => break,
-                            ExitInstr::Error => {
-                                cleanup();
-                                panic!("panicked on ExitInstr")
-                            },
+            } else {
+                match event::read() {
+                    Ok(Event::Key(kev)) => {
+                        if kev.code == KeyCode::Char('c') && kev.modifiers == KeyModifiers::CONTROL {
+                            break;
                         }
-                    }
-                },
-                Err(err) => {
-                    cleanup();
-                    panic!("{err}")
-                },
-                _ => (),
+                        if let Some(action) = KeyAndMods::from_key_event(kev).action(&config.keybinds) {
+                            // run the action and match on its ExitInstr
+                            // in most cases, if the action was successful, this will be Nothing
+                            match action.run(&post,&mut countdown) {
+                                ExitInstr::Nothing => (),
+                                ExitInstr::Break => break,
+                                ExitInstr::Error => {
+                                    cleanup();
+                                    panic!("panicked on ExitInstr")
+                                },
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        cleanup();
+                        panic!("{err}")
+                    },
+                    _ => (),
+                }
             }
         }
         countdown = countdown.saturating_sub(1);
@@ -116,12 +116,12 @@ impl Action {
                             => {
                                 let encoded:String = byte_serialize(ch.to_string().as_bytes()).collect();
                                 post(&format!("keypress/Lit_{encoded}"));
-                                sleep(Duration::from_millis(50));
+                                *countdown = delay;
                             },
                         KeyCode::Backspace if kev.modifiers == KeyModifiers::NONE
                             => {
                                 post("keypress/Backspace");
-                                sleep(Duration::from_millis(50));
+                                *countdown = delay;
                             },
                         KeyCode::Esc => break,
                         _ => (),
@@ -130,7 +130,7 @@ impl Action {
                         for substr in text.split("") {
                             let encoded:String = byte_serialize(substr.as_bytes()).collect();
                             post(&format!("keypress/Lit_{encoded}"));
-                            sleep(Duration::from_millis(50));
+                            *countdown = delay;
                         }
                     },
                     Err(..) => return ExitInstr::Error,
