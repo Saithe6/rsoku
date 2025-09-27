@@ -21,6 +21,13 @@ pub enum Command {
     VolumeMute, //vx
     PowerOff, //o
     Keyboard(String), //k
+    ChannelUp(u8),
+    ChannelDown(u8),
+    InputHDMI1,
+    InputHDMI2,
+    InputHDMI3,
+    InputHDMI4,
+    InputAV1,
 }
 impl Command {
     pub fn parse(raw:&str) -> Option<Self> {
@@ -51,6 +58,13 @@ impl Command {
             "-" | "v-" | "volume-" => VolumeDown(rpt?),
             "m" | "mute" | "vx" => VolumeMute,
             "o" | "off" | "power" | "poweroff" => PowerOff,
+            "chu" | "channel-up" => ChannelUp(rpt?),
+            "chd" | "channel-down" => ChannelDown(rpt?),
+            "hdmi" if rpt.is_some_and(|x| x == 1) => InputHDMI1,
+            "hdmi" if rpt.is_some_and(|x| x == 2) => InputHDMI2,
+            "hdmi" if rpt.is_some_and(|x| x == 3) => InputHDMI3,
+            "hdmi" if rpt.is_some_and(|x| x == 4) => InputHDMI4,
+            "av" => InputAV1,
             ":" => Keyboard(keys?.to_string()),
             _ => return None,
         })
@@ -76,6 +90,13 @@ impl Command {
             VolumeDown(rpt) => post("keypress/VolumeDown",*rpt,50),
             VolumeMute => post("keypress/VolumeMute",1,50),
             PowerOff => post("keypress/PowerOff",1,2000),
+            ChannelUp(rpt) => post("keypress/ChannelUp",*rpt,250),
+            ChannelDown(rpt) => post("keypress/ChannelDown",*rpt,250),
+            InputHDMI1 => post("keypress/InputHDMI1",1,250),
+            InputHDMI2 => post("keypress/InputHDMI2",1,250),
+            InputHDMI3 => post("keypress/InputHDMI3",1,250),
+            InputHDMI4 => post("keypress/InputHDMI4",1,250),
+            InputAV1 => post("keypress/InputAV1",1,250),
             Keyboard(keys) => {
                 for substr in keys.split("") {
                     let encoded:String = byte_serialize(substr.as_bytes()).collect();
@@ -102,4 +123,17 @@ fn split(raw:&str) -> Option<(&str,Option<u8>)> {
         },
         None => (raw,Some(1)),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_test() {
+        Command::parse("hdmi1").unwrap();
+        Command::parse("hdmi2").unwrap();
+        Command::parse("hdmi3").unwrap();
+        Command::parse("hdmi4").unwrap();
+    }
 }
