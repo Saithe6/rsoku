@@ -918,18 +918,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "roku-cli"
-version = "0.1.0"
-dependencies = [
- "confy",
- "crossterm",
- "reqwest",
- "ron",
- "serde",
- "url",
-]
-
-[[package]]
 name = "ron"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -939,6 +927,18 @@ dependencies = [
  "bitflags",
  "serde",
  "serde_derive",
+]
+
+[[package]]
+name = "rsoku"
+version = "0.1.0"
+dependencies = [
+ "confy",
+ "crossterm",
+ "reqwest",
+ "ron",
+ "serde",
+ "url",
 ]
 
 [[package]]
