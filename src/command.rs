@@ -3,24 +3,24 @@ use crate::Config;
 use super::rpt_client;
 
 pub enum Command {
-    Up(u8), //u
-    Down(u8), //d
-    Left(u8), //l
-    Right(u8), //r
-    Select(u8), //s
-    Back(u8), //b
-    Home, //h
-    Play, //play
-    Rev(u8), //rev
-    Fwd(u8), //fwd
-    InstantReplay(u8), //rw
-    Info, //i
-    Backspace(u8), //x
-    VolumeUp(u8), //v+
-    VolumeDown(u8), //v-
-    VolumeMute, //vx
-    PowerOff, //o
-    Keyboard(String), //k
+    Up(u8),
+    Down(u8),
+    Left(u8),
+    Right(u8),
+    Select(u8),
+    Back(u8),
+    Home,
+    Play,
+    Rev(u8),
+    Fwd(u8),
+    InstantReplay(u8),
+    Info,
+    Backspace(u8),
+    VolumeUp(u8),
+    VolumeDown(u8),
+    VolumeMute,
+    PowerOff,
+    Keyboard(String),
     ChannelUp(u8),
     ChannelDown(u8),
     InputHDMI1,
