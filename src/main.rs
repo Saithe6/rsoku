@@ -10,7 +10,7 @@ fn main() {
     let configdir = match env::var("XDG_CONFIG_HOME") {
         Ok(val) => format!("{val}/rsoku/config.ron"),
         Err(..) => match env::var("HOME") {
-            Ok(val) => format!("{val}/config.ron"),
+            Ok(val) => format!("{val}/rsoku.ron"),
             Err(..) => match env::var("USER") {
                 Ok(val) => format!("/home/{val}/.config/rsoku/config.ron"),
                 Err(..) => panic!("cannot find config file: HOME, USER, and XDG_CONFIG_HOME are all unset"),
