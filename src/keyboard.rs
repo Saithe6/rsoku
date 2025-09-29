@@ -66,7 +66,7 @@ pub enum Action {
     Select,
     Home,
     Back,
-    Play,
+    Pause,
     Rev,
     Fwd,
     InstantReplay,
@@ -100,7 +100,7 @@ impl Action {
             Self::Select => {action!("keypress/Select");},
             Self::Home => {action!("keypress/Home");},
             Self::Back => {action!("keypress/Back");},
-            Self::Play => {action!("keypress/Play");},
+            Self::Pause => {action!("keypress/Play");},
             Self::Rev => {action!("keypress/Rev");},
             Self::Fwd => {action!("keypress/Fwd");},
             Self::InstantReplay => {action!("keypress/InstantReplay");},
@@ -147,7 +147,7 @@ impl Action {
                 => 0,
             Self::Up | Self::Down | Self::Left | Self::Right |
             Self::Select | Self::Home | Self::Back | Self::Info |
-            Self::Play| Self::Rev | Self::Fwd | Self::InstantReplay
+            Self::Pause| Self::Rev | Self::Fwd | Self::InstantReplay
                 => 10,
             Self::VolumeUp | Self::VolumeDown | Self::VolumeMute | Self::PowerOff
                 => 50,
