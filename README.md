@@ -23,7 +23,7 @@ and keybinds, which is a map from a tuple of a KeyCode
 and bitflags for the modifier keys.
 The KeyCode is a variant of the KeyCode enum of crossterm's event module,
 and the bitflags are the underlying representation of crossterm's KeyModifiers struct.
-The [crossterm docs](<https://docs.rs/crossterm/latest/crossterm/event/enum.KeyCode.html/>)
+The [crossterm docs](<https://docs.rs/crossterm/latest/crossterm/event/enum.KeyCode.html>)
 tell you everything you need to know about what KeyCodes are available.
 The bits represent (from left to right) super, alt, control, shift.
 So `0b0001` represents shift, `0b0010` represents control,
